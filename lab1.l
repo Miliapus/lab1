@@ -5,7 +5,6 @@
 
 int lineno = 1;
 int cmnt_strt = 0; /*comment start*/
-void print_float();
 void check_inden();
 %}
 /*关键字*/
@@ -43,30 +42,21 @@ hex [0-9a-fA-F]
 "/*"			{cmnt_strt = yylineno; BEGIN CMNT;printf("开始多行注释\n");} /*记录注释开始的行号，进入注释状态*/
 <CMNT>.		 ;
 <CMNT>\n                           printf("注释换行\n") ;    
-<CMNT>"*/"                         {BEGIN INITIAL;printf("多行注释结束\n")} /*遇到第一个星号斜杠就回到初始状态*/
-<CMNT><<EOF>>               {printf("警告 注释未正确结束\n"); yyterminate();}
-\"			{BEGIN STRING;{printf("开始字符串:\n")}
+<CMNT>"*/"                        	{BEGIN INITIAL;printf("多行注释结束\n");} /*遇到第一个星号斜杠就回到初始状态*/
+<CMNT><<EOF>>               	{printf("警告 注释未正确结束\n"); yyterminate();}
+\"			{BEGIN STRING;printf("开始字符串:\n");}
 <STRING>(\n)|(<<EOF>>)	{printf("警告 字符串未正确结束\n");BEGIN INITIAL;} 
 /*防止被转义的"被<STRING>\"匹配*/
-<STRING>\\\"		{printf("\\\"")}
-<STRING>\"		{BEGIN INITIAL;{printf("\n结束字符串:\n")}
-{KEYWORD}   {
-    printf("get keyword:%s\n",yytext);
-}
-
-{VARIABLE_TPYE}   {
-    printf("get keyword:%s\n",yytext);
-}
-
-{OPT}   {
-    printf("get opt:%s\n",yytext);
-}
-{RELOP} {
-    printf("get relop:%s\n",yytext);
-}
-{LP}    {
-    printf("get lp:%s\n",yytext);
-}
+<STRING>\\\"		printf("\\\"");
+<STRING>\"		{BEGIN INITIAL;printf("\n结束字符串:\n");}
+"int[]" 			printf("int数组%s\n", yytext);
+"double[]" 		printf("double数组%s\n", yytext);
+"char[]" 			printf("字符数组: %s\n", yytext);
+{KEYWORD}   		printf("get keyword:%s\n",yytext);
+{VARIABLE_TPYE} 		printf("get keyword:%s\n",yytext);
+{OPT}			printf("get opt:%s\n",yytext);
+{RELOP}			printf("get relop:%s\n",yytext);
+{LP}			printf("get lp:%s\n",yytext);
 {RP}    {
     printf("get rp:%s\n",yytext);
 }
@@ -88,25 +78,14 @@ hex [0-9a-fA-F]
 {END}   {   
     printf("get end:%s\n",yytext);
 }
-
-"int[]" {printf("int数组%s\n", yytext);}
-"double[]" {printf("double数组%s\n", yytext);}
-"char[]" {printf("字符数组: %s\n", yytext);}
-
 [+\-]?[0][x|X]{hex}+ {printf("get hex number: %s\n", yytext);}
 [+\-]?{number}+[lLuU]?             { printf("get  number: %s\n", yytext);}
-[+\-]?{number}*\.({number})*([eE][+\-]?{number}*)?          { print_float();}
-{identifier}                            {printf("变量: %s\n", yytext);}
-
+[+\-]?{number}*\.({number})*([eE][+\-]?{number}*)?          printf("get float  number: %s\n", yytext);
+{identifier}                            		printf("变量: %s\n", yytext);
 {number}+({letter}|_)+	          {printf("Illegal identifier name: %s\n",yytext);}
-
 [+\-]?{number}*\.{number}+([eE][+][-]{number})?          { printf("Illegal float num %s\n",yytext);}
-           
 .                                   {printf("Not match: %1s\n", yytext);}
 %%
-void print_float(){
-    printf("get float  number: %s\n", yytext);
-}
 int main()
 {
     yylex();
