@@ -9,13 +9,13 @@ void print_float();
 void check_inden();
 void string_check();
 %}
-//关键字
+/*关键字*/
 KEYWORD (if)|(else)|(switch)|(case)|(default)|(while)|(true)|(false)|(return)
-//基本类型
+/*基本类型*/
 VARIABLE_TPYE (int)|(double)|(float)|(void)|(char)
-//运算符
+/*运算符*/
 OPT [+]|[-]|[*]|[/]
-//逻辑运算符
+/*逻辑运算符*/
 RELOP   [<]|[<][=]|[>]|[>][=]|[=][=]|[!][=]|[=]|[!]|[||]
 //各种括号
 LP  \(
@@ -26,9 +26,9 @@ LC  \{
 RC  \}
 COM ,
 END ;
-//数字
+/*数字*/
 number [0-9]
-//字母
+/*字母*/
 letter [a-zA-Z]
 /*标识符，最多32个字符，下划线或者字符开头，可以由下划线或者数字或者字母组成*/
 identifier (_|{letter})({letter}|{number}|_)*
