@@ -7,7 +7,6 @@ int lineno = 1;
 int cmnt_strt = 0; /*comment start*/
 void print_float();
 void check_inden();
-void string_check();
 %}
 /*关键字*/
 KEYWORD (if)|(else)|(switch)|(case)|(default)|(while)|(true)|(false)|(return)
@@ -34,9 +33,23 @@ letter [a-zA-Z]
 identifier (_|{letter})({letter}|{number}|_)*
 ws  [ \r\f\v]+
 hex [0-9a-fA-F]   
+/*注释状态*/
 %x CMNT
+/*字符串状态*/
+%x STRING
 %%
-
+\s			;
+"//".*                          	printf("单行注释\n") ;          
+"/*"			{cmnt_strt = yylineno; BEGIN CMNT;printf("开始多行注释\n");} /*记录注释开始的行号，进入注释状态*/
+<CMNT>.		 ;
+<CMNT>\n                           printf("注释换行\n") ;    
+<CMNT>"*/"                         {BEGIN INITIAL;printf("多行注释结束\n")} /*遇到第一个星号斜杠就回到初始状态*/
+<CMNT><<EOF>>               {printf("警告 注释未正确结束\n"); yyterminate();}
+\"			{BEGIN STRING;{printf("开始字符串:\n")}
+<STRING>(\n)|(<<EOF>>)	{printf("警告 字符串未正确结束\n");BEGIN INITIAL;} 
+/*防止被转义的"被<STRING>\"匹配*/
+<STRING>\\\"		{printf("\\\"")}
+<STRING>\"		{BEGIN INITIAL;{printf("\n结束字符串:\n")}
 {KEYWORD}   {
     printf("get keyword:%s\n",yytext);
 }
@@ -83,52 +96,17 @@ hex [0-9a-fA-F]
 [+\-]?[0][x|X]{hex}+ {printf("get hex number: %s\n", yytext);}
 [+\-]?{number}+[lLuU]?             { printf("get  number: %s\n", yytext);}
 [+\-]?{number}*\.({number})*([eE][+\-]?{number}*)?          { print_float();}
-{ws} ;
-
-{identifier}                            {check_inden();}
+{identifier}                            {printf("变量: %s\n", yytext);}
 
 {number}+({letter}|_)+	          {printf("Illegal identifier name: %s\n",yytext);}
 
 [+\-]?{number}*\.{number}+([eE][+][-]{number})?          { printf("Illegal float num %s\n",yytext);}
-
-\"[^\"\n]*\"                      {string_check();}
-
-\"[^\"\n]*$                     {printf("Unterminated string: %s\n",yytext);}
-"//".*                           ;                             
-"/*"                              {cmnt_strt = yylineno; BEGIN CMNT;} /*记录注释开始的行号，进入注释状态*/
-<CMNT>.|{ws}                      ;
-<CMNT>\n                          {yylineno++;}
-<CMNT>"*/"                        {BEGIN INITIAL;} /*遇到第一个星号斜杠就回到初始状态*/
-<CMNT><<EOF>>                     {printf("Line %3d: Unterminated comment\n", cmnt_strt); yyterminate();}
-
+           
 .                                   {printf("Not match: %1s\n", yytext);}
 %%
-
-void check_inden(){
-    if(strlen(yytext) > 31){
-        printf("Error : the identifier is too long !\n");
-        return;
-    }
-
-    printf("get identifier: %s\n", yytext);
-    return;
-}
-
 void print_float(){
     printf("get float  number: %s\n", yytext);
 }
-
-void string_check(){
-    if(yytext[yyleng-2]=='\\') /* 检查这个引号是不是转义字符 */
-    {
-         yyless(yyleng-1);       /* 如果是转义字符需要退回进行重新匹配 */
-        //yymore();       /*下一次被匹配的字符串被添加在当前识别出的字符串后面*/
-    }else{
-                printf("get string:  %s\n", yytext);
-                return ;
-    }
-}
-
 int main()
 {
     yylex();
