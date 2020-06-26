@@ -45,7 +45,8 @@ hex [0-9a-fA-F]
 <CMNT>"*/"                        	{BEGIN INITIAL;printf("多行注释结束\n");} /*遇到第一个星号斜杠就回到初始状态*/
 <CMNT><<EOF>>               	{printf("警告 注释未正确结束\n"); yyterminate();}
 \"			{BEGIN STRING;printf("开始字符串:\n");}
-<STRING>(\n)|(<<EOF>>)	{printf("警告 字符串未正确结束\n");BEGIN INITIAL;} 
+<STRING>\n		{printf("警告 字符串未正确结束\n");BEGIN INITIAL;} 
+<STRING><<EOF>>	printf("警告 字符串未正确结束\n");
 <STRING>\\\"		printf("\\\"");/*防止被转义的"被<STRING>\"匹配*/
 <STRING>\"		{BEGIN INITIAL;printf("\n结束字符串:\n");}
 "int[]" 			printf("int数组%s\n", yytext);
