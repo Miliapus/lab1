@@ -46,8 +46,7 @@ hex [0-9a-fA-F]
 <CMNT><<EOF>>               	{printf("警告 注释未正确结束\n"); yyterminate();}
 \"			{BEGIN STRING;printf("开始字符串:\n");}
 <STRING>(\n)|(<<EOF>>)	{printf("警告 字符串未正确结束\n");BEGIN INITIAL;} 
-/*防止被转义的"被<STRING>\"匹配*/
-<STRING>\\\"		printf("\\\"");
+<STRING>\\\"		printf("\\\"");/*防止被转义的"被<STRING>\"匹配*/
 <STRING>\"		{BEGIN INITIAL;printf("\n结束字符串:\n");}
 "int[]" 			printf("int数组%s\n", yytext);
 "double[]" 		printf("double数组%s\n", yytext);
