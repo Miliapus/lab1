@@ -1,0 +1,11 @@
+0: main:
+1: arg argc
+2: i = 0
+3: if i < 10 goto 7
+4: goto 10
+5: i++
+6: goto 3
+7: x = 120
+8: i = 2
+9: goto 5
+10: exit
